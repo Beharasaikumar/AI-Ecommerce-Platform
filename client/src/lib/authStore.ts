@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { cartStore } from './cartStore'
+
 
 export interface AuthUser {
     id: number
@@ -33,6 +35,7 @@ export const authStore = {
         localStorage.setItem('auth_token', token)
         localStorage.setItem('auth_user', JSON.stringify(user))
         currentUser = user
+        cartStore.reload() 
         notify()
         return user
     },
@@ -43,6 +46,7 @@ export const authStore = {
         localStorage.setItem('auth_token', token)
         localStorage.setItem('auth_user', JSON.stringify(user))
         currentUser = user
+        cartStore.reload()
         notify()
         return user
     },
@@ -51,6 +55,7 @@ export const authStore = {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')
         currentUser = null
+        cartStore.reload()
         notify()
         window.location.href = '/login'
     },

@@ -19,13 +19,26 @@ interface CartStore {
 
 let listeners: (() => void)[] = []
 
+function getCartKey(): string {
+  try {
+    const stored = localStorage.getItem('auth_user')
+    const user = stored ? JSON.parse(stored) : null
+    return user?.id ? `cart_user_${user.id}` : 'cart_guest'
+  } catch {
+    return 'cart_guest'
+  }
+}
+
 function getStoredCart(): CartItem[] {
-  try { return JSON.parse(localStorage.getItem('cart') || '[]') }
-  catch { return [] }
+  try {
+    return JSON.parse(localStorage.getItem(getCartKey()) || '[]')
+  } catch {
+    return []
+  }
 }
 
 function saveAndNotify(items: CartItem[]) {
-  localStorage.setItem('cart', JSON.stringify(items))
+  localStorage.setItem(getCartKey(), JSON.stringify(items))
   listeners.forEach(l => l())
 }
 
@@ -40,9 +53,11 @@ export const cartStore = {
       )
     } else {
       updated = [...current, {
-        id: product.id, name: product.name,
+        id: product.id,
+        name: product.name,
         price: Number(product.price),
-        image_url: product.image_url, quantity: 1
+        image_url: product.image_url,
+        quantity: 1,
       }]
     }
     saveAndNotify(updated)
@@ -53,10 +68,7 @@ export const cartStore = {
   },
 
   updateQty(id: number, qty: number) {
-    if (qty <= 0) {
-      this.removeItem(id)
-      return
-    }
+    if (qty <= 0) { this.removeItem(id); return }
     saveAndNotify(getStoredCart().map(i => i.id === id ? { ...i, quantity: qty } : i))
   },
 
@@ -72,10 +84,14 @@ export const cartStore = {
     return getStoredCart().reduce((s, i) => s + i.price * i.quantity, 0)
   },
 
+  reload() {
+    listeners.forEach(l => l())
+  },
+
   subscribe(listener: () => void) {
     listeners.push(listener)
     return () => { listeners = listeners.filter(l => l !== listener) }
-  }
+  },
 }
 
 export function useCart(): CartStore {

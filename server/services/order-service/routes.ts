@@ -52,7 +52,7 @@ router.get('/api/orders', async (req: Request, res: Response) => {
     res.json({ success: true, data: result.rows });
 
   } catch (err: any) {
-    console.error('Orders API error:', err); // 🔥 debug
+    console.error('Orders API error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
