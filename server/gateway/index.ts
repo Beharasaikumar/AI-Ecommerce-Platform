@@ -47,12 +47,16 @@ async function proxyRequest(
 ) {
   try {
     const url = `${serviceUrl}${req.originalUrl}`;
+    const headers = { ...req.headers, 'Content-Type': 'application/json' } as Record<string, any>;
+    delete headers.host;
+    delete headers['content-length'];
+
     const response = await axios({
       method: req.method as any,
       url,
       data: req.body,
       params: req.query,
-      headers: { 'Content-Type': 'application/json' },
+      headers,
     });
     res.status(response.status).json(response.data);
   } catch (error: any) {
